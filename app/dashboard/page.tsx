@@ -15,7 +15,6 @@ export default function DashboardPage() {
   useEffect(() => {
     async function checkValidation() {
       const isValidated = await isUserValidated();
-      console.log("Valid: " + isValidated);
       if (!isValidated) {
         router.push("/login");
       } else {

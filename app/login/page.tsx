@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,6 +12,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from "next/link"
+import { isUserValidated } from "@/lib/validate-login"
+import Spinner from "@/components/ui/loading-spinner";
 
 export default function LoginPage() {
   const router = useRouter()
@@ -22,26 +24,38 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [loginAttempts, setLoginAttempts] = useState(0)
 
+   useEffect(() => {
+      async function checkValidation() {
+        setIsLoading(true)
+        const isValidated = await isUserValidated();
+        if (isValidated) {
+          setTimeout(() => {setIsLoading(false)}, 5000)
+          //router.push("/dashboard");
+        }
+        setIsLoading(false)
+      }
+      checkValidation();
+    }, [router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
   
     try {
-      // Hacer la llamada real a la API de login
       const response = await fetch('/api/login', {
         method: 'POST',
         mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password })
       });
   
       const data = await response.json();
   
       if (!response.ok) {
-        // Si la respuesta no es OK, incrementar intentos de login
         const newAttempts = loginAttempts + 1;
         setLoginAttempts(newAttempts);
   
@@ -52,19 +66,18 @@ export default function LoginPage() {
         }
         return;
       }
-  
-      // En caso de éxito, guardar los tokens
-      localStorage.setItem('accessToken', data.token);
-      //localStorage.setItem('refreshToken', data.refreshToken);
       
-      // Redireccionar al dashboard
+      localStorage.setItem('accessToken', data.token);
+      localStorage.setItem('account', data.user.account);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
       router.push("/dashboard");
       
     } catch (err) {
       setError("An error occurred during login");
       console.error(err);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
@@ -95,6 +108,7 @@ export default function LoginPage() {
       }
   
       const data = await response.json();
+      console.log(data);
       localStorage.setItem('accessToken', data.accessToken);
       return data.accessToken;
     } catch (error) {
@@ -143,6 +157,8 @@ export default function LoginPage() {
       return null;
     }
   };
+
+  
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
@@ -200,7 +216,7 @@ export default function LoginPage() {
                 </Label>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign in"}
+                {isLoading ? <Spinner /> : "Login"}
               </Button>
             </form>
           </CardContent>

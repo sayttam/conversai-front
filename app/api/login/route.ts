@@ -9,12 +9,25 @@ export async function POST(request: Request) {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include", // 🔥 Permite enviar y recibir cookies
       body: JSON.stringify(body),
     })
 
     const data = await response.json()
 
-    return NextResponse.json(data, { status: response.status })
+    // 🔥 Extraer cookies del backend y reenviarlas al frontend
+    const responseHeaders = new Headers(response.headers)
+    const cookies = responseHeaders.get("set-cookie")
+
+    const nextResponse = NextResponse.json(data, { status: response.status })
+
+    if (cookies) {
+      nextResponse.headers.set("set-cookie", cookies) // 🔥 Pasar cookies al cliente
+    }
+
+    return nextResponse
+    
+
   } catch (error) {
     console.error("Login API error:", error)
     return NextResponse.json({ message: "Internal server error" }, { status: 500 })

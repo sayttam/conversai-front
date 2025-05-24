@@ -1,212 +1,256 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, BarChart3, Edit, LineChart, MoreHorizontal, PieChart, Share2, Users } from "lucide-react"
+"use client"
+import React from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ArrowLeft, Edit, MessageSquare, BarChart, Calendar, Users, CheckSquare } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
 
-export default function CampaignDetailPage({ params }: { params: { id: string } }) {
-  // This would normally fetch campaign data based on the ID
-  const campaignId = params.id
+interface Campaign {
+  _id: string
+  name: string
+  type: string
+  instructions: string
+  tasks: string[]
+  createdAt: string
+  campaignId: string
+  startDate?: string
+  endDate?: string
+  clientId?: number
+  status?: string
+  performance?: number
+  __v: number
+}
+
+export default function CampaignDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const router = useRouter()
+  const [campaign, setCampaign] = useState<Campaign | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+
+  const resolvedParams = React.use(params)
+
+  useEffect(() => {
+    fetchCampaign()
+  }, [])
+
+  const fetchCampaign = async () => {
+    try {
+      const response = await fetch(`/api/campaigns/id/${resolvedParams.id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": localStorage.getItem("accessToken") || "",
+        },
+        credentials: "include",
+      })
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch campaign")
+      }
+      const data = await response.json()
+      setCampaign(data)
+    } catch (error) {
+      console.error("Error fetching campaign:", error)
+      toast({
+        title: "Error",
+        description: "Failed to load campaign details",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getStatusColor = (status?: string) => {
+    switch (status?.toLowerCase()) {
+      case "active":
+        return "bg-green-500"
+      case "paused":
+        return "bg-yellow-500"
+      case "completed":
+        return "bg-blue-500"
+      case "draft":
+        return "bg-gray-500"
+      default:
+        return "bg-gray-500"
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="mb-6">
+          <Skeleton className="h-8 w-24 mb-4" />
+          <Skeleton className="h-12 w-3/4 mb-2" />
+          <Skeleton className="h-6 w-1/2" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </div>
+    )
+  }
+
+  if (!campaign) {
+    return (
+      <div className="container mx-auto p-6">
+        <Button variant="outline" onClick={() => router.back()} className="mb-6">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold mb-2">Campaign not found</h2>
+          <p className="text-gray-500 mb-6">
+            The campaign you're looking for doesn't exist or you don't have permission to view it.
+          </p>
+          <Button asChild>
+            <Link href="/dashboard/campaigns">View All Campaigns</Link>
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" asChild>
-            <Link href="/dashboard/campaigns">
-              <ArrowLeft className="h-4 w-4" />
+    <div className="container mx-auto p-6">
+      <Button variant="outline" onClick={() => router.back()} className="mb-6">
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back
+      </Button>
+
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold">{campaign.name}</h1>
+          <p className="text-gray-500">Campaign ID: {campaign.campaignId}</p>
+        </div>
+        <div className="flex gap-2 mt-4 md:mt-0">
+          <Badge className={getStatusColor(campaign.status)}>{campaign.status || "Draft"}</Badge>
+          <Button variant="outline" asChild>
+            <Link href={`/dashboard/campaigns/${campaign._id}/edit`}>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Campaign
             </Link>
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Summer Sale 2025</h1>
-            <p className="text-muted-foreground">Campaign ID: {campaignId}</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex items-center gap-1">
-            <Share2 className="h-4 w-4" />
-            Share
-          </Button>
-          <Button variant="outline" size="sm" className="flex items-center gap-1">
-            <Edit className="h-4 w-4" />
-            Edit
-          </Button>
-          <Button variant="outline" size="icon">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Impressions</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center">
+              <Calendar className="mr-2 h-5 w-5" />
+              Timeline
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24,853</div>
-            <Progress value={65} className="mt-2" />
-            <p className="text-xs text-muted-foreground mt-1">65% of target</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Clicks</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">3,652</div>
-            <Progress value={78} className="mt-2" />
-            <p className="text-xs text-muted-foreground mt-1">78% of target</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-            <LineChart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">14.3%</div>
-            <Progress value={92} className="mt-2" />
-            <p className="text-xs text-muted-foreground mt-1">92% of target</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenue</CardTitle>
-            <PieChart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$12,543</div>
-            <Progress value={45} className="mt-2" />
-            <p className="text-xs text-muted-foreground mt-1">45% of target</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="mt-6">
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="audience">Audience</TabsTrigger>
-            <TabsTrigger value="budget">Budget</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview">
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Campaign Details</CardTitle>
-                  <CardDescription>Key information about this campaign</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <dl className="space-y-4">
-                    <div className="flex justify-between">
-                      <dt className="font-medium">Status</dt>
-                      <dd>
-                        <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                          Active
-                        </span>
-                      </dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="font-medium">Type</dt>
-                      <dd>Email Campaign</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="font-medium">Start Date</dt>
-                      <dd>June 1, 2025</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="font-medium">End Date</dt>
-                      <dd>August 31, 2025</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="font-medium">Target Audience</dt>
-                      <dd>All Users</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="font-medium">Budget</dt>
-                      <dd>$25,000</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="font-medium">Created By</dt>
-                      <dd>John Doe</dd>
-                    </div>
-                  </dl>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Campaign Performance</CardTitle>
-                  <CardDescription>Performance metrics over time</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[250px] w-full rounded-md border border-dashed flex items-center justify-center">
-                    <div className="text-center">
-                      <LineChart className="mx-auto h-12 w-12 text-muted-foreground" />
-                      <p className="mt-2 text-sm text-muted-foreground">Performance chart visualization</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="space-y-2">
+              <div>
+                <p className="text-sm font-medium">Start Date</p>
+                <p className="text-sm text-gray-500">
+                  {campaign.startDate ? new Date(campaign.startDate).toLocaleDateString() : "Not specified"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">End Date</p>
+                <p className="text-sm text-gray-500">
+                  {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : "Not specified"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Created</p>
+                <p className="text-sm text-gray-500">{new Date(campaign.createdAt).toLocaleDateString()}</p>
+              </div>
             </div>
-          </TabsContent>
+          </CardContent>
+        </Card>
 
-          <TabsContent value="performance">
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Metrics</CardTitle>
-                <CardDescription>Detailed performance analysis for this campaign</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[350px] w-full rounded-md border border-dashed flex items-center justify-center">
-                  <div className="text-center">
-                    <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <p className="mt-2 text-sm text-muted-foreground">Performance metrics visualization</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center">
+              <Users className="mr-2 h-5 w-5" />
+              Campaign Type
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600">{campaign.type || "No type specified"}</p>
+          </CardContent>
+        </Card>
 
-          <TabsContent value="audience">
-            <Card>
-              <CardHeader>
-                <CardTitle>Audience Insights</CardTitle>
-                <CardDescription>Demographic and behavioral data for your audience</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[350px] w-full rounded-md border border-dashed flex items-center justify-center">
-                  <div className="text-center">
-                    <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <p className="mt-2 text-sm text-muted-foreground">Audience insights visualization</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center">
+              <BarChart className="mr-2 h-5 w-5" />
+              Performance
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div>
+                <p className="text-sm font-medium">Performance Score</p>
+                <p className="text-sm text-gray-500">
+                  {campaign.performance !== undefined ? `${campaign.performance}%` : "Not available"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Client ID</p>
+                <p className="text-sm text-gray-500">{campaign.clientId || "Not specified"}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-          <TabsContent value="budget">
-            <Card>
-              <CardHeader>
-                <CardTitle>Budget Allocation</CardTitle>
-                <CardDescription>Track your spending and budget allocation</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[350px] w-full rounded-md border border-dashed flex items-center justify-center">
-                  <div className="text-center">
-                    <PieChart className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <p className="mt-2 text-sm text-muted-foreground">Budget allocation visualization</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Instructions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-600">{campaign.instructions || "No instructions provided"}</p>
+        </CardContent>
+      </Card>
+
+      {campaign.tasks && campaign.tasks.length > 0 && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <CheckSquare className="mr-2 h-5 w-5" />
+              Tasks
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {campaign.tasks.map((task, index) => (
+                <li key={index} className="flex items-start">
+                  <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-gray-100 text-gray-800 text-sm font-medium mr-3">
+                    {index + 1}
+                  </span>
+                  <span className="text-gray-600">{task}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Button asChild className="w-full">
+          <Link href={`/dashboard/chat/${campaign._id}`}>
+            <MessageSquare className="mr-2 h-5 w-5" />
+            Open Chat
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="w-full">
+          <Link href={`/dashboard/analytics?campaignId=${campaign._id}`}>
+            <BarChart className="mr-2 h-5 w-5" />
+            View Analytics
+          </Link>
+        </Button>
       </div>
     </div>
   )

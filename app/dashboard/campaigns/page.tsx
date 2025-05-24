@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Search, MoreHorizontal, Edit, Archive, Eye, Trash2, Filter, ArrowUpDown, Calendar } from "lucide-react"
 
 interface Campaign {
+  _id: string
   id: string
   name: string
   client: string
@@ -26,97 +27,89 @@ interface Campaign {
   endDate: string
   status: "active" | "scheduled" | "ended" | "archived"
   performance: number
+  type: string
+  instructions: string
+  tasks: string[]
+  created_at: string
+  campaignId: string
+  campaignName: string
+  clientId: string
 }
 
-export default async function CampaignsPage() {
+interface User {
+    _id: string
+    email: string
+    name: string
+    role: string
+    account: string
+    clientsAssigned: string[]
+}
+
+
+export default function CampaignsPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [filter, setFilter] = useState("all")
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [user, setUser] = useState<User | null>(null)
 
-  try {
-    // Hacer la llamada real a la API de login
-    const accessToken = localStorage.getItem('accessToken');
-    const response = await fetch('/api/login', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
+  useEffect(() => {
+    const getCampaigns = async () => {
+      try {
+        const storageUser = JSON.parse(localStorage.getItem('user') || 'null');
+        const token = localStorage.getItem('accessToken');
+  
+        const responseUser = await fetch('/api/user/email/' + storageUser.email, {
+          method: 'GET',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token || '',
+          },
+          credentials: 'include'  
+        });
+  
+        const dataUser = await responseUser.json();
+  
+        if (!responseUser.ok) {
+          console.error('Failed to fetch user:', dataUser);
+          return;
+        }
+        
+        setUser(dataUser.user);
+  
+        const campaignPromises = (dataUser.user.clientsAssigned as string[]).map(client => 
+          fetch('/api/campaigns/' + client, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token || '',
+            },
+            credentials: 'include'  
+          }).then(res => res.json())
+        );
+  
+        const campaignsResponses = await Promise.all(campaignPromises);
+  
+        const campaignsData = campaignsResponses
+          .filter(response => response && response.campaigns)
+          .flatMap(response => response.campaigns);
+  
+        setCampaigns(campaignsData);
+  
+      } catch (err) {
+        console.error('Error fetching campaigns:', err);
       }
-    });
-
-    const data = await response.json();
-    const campaigns: Campaign[] = data.campaigns;
-
-    if (!response.ok) {
-      return campaigns;
-    }
-
-    // En caso de éxito, guardar los tokens
-    localStorage.setItem('accessToken', data.token);
-    localStorage.setItem('refreshToken', data.refreshToken);
-    
-    // Redireccionar al dashboard
-    router.push("/dashboard");
-    
-  } catch (err) {
-    console.error(err);
-  }
-
-  // Sample campaign data
-  const campaigns: Campaign[] = [
-    {
-      id: "1",
-      name: "Summer Sale 2025",
-      client: "Acme Inc",
-      startDate: "2025-06-01",
-      endDate: "2025-08-31",
-      status: "active",
-      performance: 92,
-    },
-    {
-      id: "2",
-      name: "Product Launch - Model X",
-      client: "TechCorp",
-      startDate: "2025-07-15",
-      endDate: "2025-09-15",
-      status: "scheduled",
-      performance: 0,
-    },
-    {
-      id: "3",
-      name: "Spring Collection",
-      client: "Fashion World",
-      startDate: "2025-03-01",
-      endDate: "2025-05-31",
-      status: "ended",
-      performance: 88,
-    },
-    {
-      id: "4",
-      name: "Holiday Special",
-      client: "Global Retail",
-      startDate: "2024-11-15",
-      endDate: "2025-01-15",
-      status: "active",
-      performance: 95,
-    },
-    {
-      id: "5",
-      name: "Customer Feedback Survey",
-      client: "Service Pro",
-      startDate: "2025-05-01",
-      endDate: "2025-06-30",
-      status: "scheduled",
-      performance: 0,
-    },
-  ]
+    };
+  
+    getCampaigns();
+  }, []);
+  
 
   const filteredCampaigns = campaigns.filter((campaign) => {
-    // Filter by status
     if (filter !== "all" && campaign.status !== filter) return false
 
-    // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
       return campaign.name.toLowerCase().includes(query) || campaign.client.toLowerCase().includes(query)
@@ -210,7 +203,7 @@ export default async function CampaignsPage() {
               <TableBody>
                 {filteredCampaigns.length > 0 ? (
                   filteredCampaigns.map((campaign) => (
-                    <TableRow key={campaign.id}>
+                    <TableRow key={campaign._id}>
                       <TableCell className="font-medium">{campaign.name}</TableCell>
                       <TableCell>{campaign.client}</TableCell>
                       <TableCell>
@@ -227,13 +220,12 @@ export default async function CampaignsPage() {
                           <div className="flex items-center gap-2">
                             <div className="h-2 w-16 rounded-full bg-gray-200">
                               <div
-                                className={`h-full rounded-full ${
-                                  campaign.performance > 90
+                                className={`h-full rounded-full ${campaign.performance > 90
                                     ? "bg-green-500"
                                     : campaign.performance > 75
                                       ? "bg-yellow-500"
                                       : "bg-red-500"
-                                }`}
+                                  }`}
                                 style={{ width: `${campaign.performance}%` }}
                               />
                             </div>
@@ -254,8 +246,8 @@ export default async function CampaignsPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                              <Eye className="mr-2 h-4 w-4" /> View
+                            <DropdownMenuItem onClick={() => router.push("/dashboard/campaigns/" + campaign._id)} >
+                              <Eye className="mr-2 h-4 w-4"/> View
                             </DropdownMenuItem>
                             <DropdownMenuItem>
                               <Edit className="mr-2 h-4 w-4" /> Edit

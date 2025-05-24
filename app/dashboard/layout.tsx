@@ -39,49 +39,6 @@ interface NavItem {
   submenu?: { title: string; href: string }[]
 }
 
-const navItems: NavItem[] = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: <BarChart3 className="h-5 w-5" />,
-  },
-  {
-    title: "Campaigns",
-    href: "/dashboard/campaigns",
-    icon: <Layers className="h-5 w-5" />,
-    submenu: [
-      { title: "Active Campaigns", href: "/dashboard/campaigns" },
-      { title: "Create Campaign", href: "/dashboard/campaigns/create" },
-      { title: "Archives", href: "/dashboard/campaigns/archive" },
-    ],
-  },
-  {
-    title: "Products",
-    href: "/dashboard/products",
-    icon: <ShoppingBag className="h-5 w-5" />,
-  },
-  {
-    title: "Clients",
-    href: "/dashboard/clients",
-    icon: <Users className="h-5 w-5" />,
-  },
-  {
-    title: "Chat Logs",
-    href: "/dashboard/chat-logs",
-    icon: <MessageSquare className="h-5 w-5" />,
-  },
-  {
-    title: "AI Settings",
-    href: "/dashboard/ai-settings",
-    icon: <Zap className="h-5 w-5" />,
-  },
-  {
-    title: "Settings",
-    href: "/dashboard/settings",
-    icon: <Settings className="h-5 w-5" />,
-  },
-]
-
 export default function DashboardLayout({
   children,
 }: {
@@ -90,10 +47,87 @@ export default function DashboardLayout({
   const pathname = usePathname()
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
   const [isMounted, setIsMounted] = useState(false)
+  const [userData, setUserData] = useState<any>(null)
 
   useEffect(() => {
     setIsMounted(true)
+    // Función para leer los datos del usuario
+    const loadUserData = () => {
+      const user = localStorage.getItem("user")
+      const parsedUserData = user ? JSON.parse(user) : null
+      setUserData(parsedUserData)
+    }
+
+    // Cargar datos iniciales
+    loadUserData()
+
+    // Escuchar cambios en localStorage
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "user") {
+        loadUserData()
+      }
+    }
+
+    // Escuchar cambios en la misma pestaña
+    const handleCustomStorageChange = () => {
+      loadUserData()
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+    window.addEventListener("userDataChanged", handleCustomStorageChange)
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+      window.removeEventListener("userDataChanged", handleCustomStorageChange)
+    }
   }, [])
+
+  // Regenerar navItems cuando userData cambie
+  const navItems: NavItem[] = [
+    {
+      title: "Dashboard",
+      href: "/dashboard",
+      icon: <BarChart3 className="h-5 w-5" />,
+    },
+    {
+      title: "Campaigns",
+      href: "/dashboard/campaigns",
+      icon: <Layers className="h-5 w-5" />,
+      submenu: [
+        { title: "Active Campaigns", href: "/dashboard/campaigns" },
+        { 
+          title: "Create Campaign", 
+          href: "/dashboard/campaigns/create" + (userData?.clientsAssigned?.[0] ? `/${userData.clientsAssigned[0]}` : '') 
+        },
+        { title: "Archives", href: "/dashboard/campaigns/archive" },
+      ],
+    },
+    {
+      title: "Products",
+      href: "/dashboard/products",
+      icon: <ShoppingBag className="h-5 w-5" />,
+    },
+    {
+      title: "Clients",
+      href: "/dashboard/clients",
+      icon: <Users className="h-5 w-5" />,
+    },
+    {
+      title: "Chat Logs",
+      href: "/dashboard/chat-logs",
+      icon: <MessageSquare className="h-5 w-5" />,
+    },
+    {
+      title: "AI Settings",
+      href: "/dashboard/ai-settings",
+      icon: <Zap className="h-5 w-5" />,
+    },
+    {
+      title: "Settings",
+      href: "/dashboard/settings",
+      icon: <Settings className="h-5 w-5" />,
+    },
+  ]
 
   const toggleSubmenu = (title: string) => {
     setOpenSubmenu(openSubmenu === title ? null : title)
@@ -103,13 +137,32 @@ export default function DashboardLayout({
     return null
   }
 
+  const handleLogout = async () => {
+    try {
+      console.log("logging out")
+      await fetch("/api/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      localStorage.removeItem("user");
+      localStorage.removeItem("account");
+      
+      // Disparar evento personalizado para notificar el cambio
+      window.dispatchEvent(new Event("userDataChanged"))
+      
+      setUserData(null)
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
   return (
     <div className="flex h-screen bg-background">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 border-r">
         <div className="p-4 border-b">
           <Link href="/dashboard" className="flex items-center">
-            <span className="text-xl font-bold">AI Chatbot Admin</span>
+            <img src="../../ConversAI_logo2-removebg-preview.png" alt="ConversAI" />
           </Link>
         </div>
         <nav className="flex-1 overflow-y-auto p-2">
@@ -187,7 +240,7 @@ export default function DashboardLayout({
           <div className="flex flex-col h-full">
             <div className="p-4 border-b flex justify-between items-center">
               <Link href="/dashboard" className="font-bold text-lg">
-                AI Chatbot Admin
+                ConversAI
               </Link>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -271,42 +324,45 @@ export default function DashboardLayout({
                 <Bell className="h-5 w-5" />
                 <span className="sr-only">Notifications</span>
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
-                      <AvatarFallback>AD</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-1 leading-none">
-                      <p className="font-medium">Admin User</p>
-                      <p className="w-[200px] truncate text-sm text-muted-foreground">admin@example.com</p>
+              {userData && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={userData?.profilePicture} alt="User Avatar" />
+                        <AvatarFallback style={{ 
+                          background: 'linear-gradient(135deg, #00BFFF, #6A00CD)',
+                          color: '#fff',}}>
+                          {userData?.name?.substring(0, 1) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <div className="flex items-center justify-start gap-2 p-2">
+                      <div className="flex flex-col space-y-1 leading-none">
+                        <p className="font-medium">{userData.name}</p>
+                        <p className="w-[200px] truncate text-sm text-muted-foreground">{userData.email}</p>
+                      </div>
                     </div>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/profile">Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/settings">Settings</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/login" className="flex items-center" onClick={() => {
-                        localStorage.removeItem("accessToken");
-                        localStorage.removeItem("refreshToken");
-                      }
-                    }>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log Out</span>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/profile">Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/settings">Settings</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/login" className="flex items-center"
+                        onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log Out</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </div>
         </header>
@@ -317,4 +373,3 @@ export default function DashboardLayout({
     </div>
   )
 }
-
