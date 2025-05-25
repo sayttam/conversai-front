@@ -13,9 +13,70 @@ body {
   box-shadow: inset 1px 0 10px 3px #d2c2ff;
 }
 
+button, .sideBarLink {
+  transition: 500ms;
+}
+
+button:hover, .sideBarLink:hover {
+  background: linear-gradient(45deg,  #00BFFF, #6A00CD) !important;
+  color: #fff !important;
+  transform: scale(1.03);
+}
+
+.globe {
+    background: linear-gradient(45deg,  #00BFFF, #6A00CD) !important;
+  color: #fff !important;
+}
+
 .joiaButton:hover {
   background: linear-gradient(45deg, #007888, #64004b) !important;
   transform: scale(1.03);
+}
+
+.loginBackground {
+  background: linear-gradient(45deg,  #00BFFF, #6A00CD) !important;
+  animation: gradientAnimation infinite ease;
+}
+
+.messageAvatar {
+  background: linear-gradient(45deg,  #6A00CD, #00ffd5) !important;
+  color: #fff
+}
+
+.conversationCard {
+  height: 1000px !important;
+}
+
+.loadingSpinner {
+  position: relative;
+  bottom: 150px;
+}
+
+@keyframes gradientAnimation {
+  0% {
+    position: relative;
+    left: 10px !important;
+  }
+  25% {
+    position: relative;
+    left: 50px !important;
+  }
+  50% {
+    position: relative;
+    left: 100px !important;
+  }
+  75% {
+    position: relative;
+    left: 50px !important;
+  }
+  100% {
+    position: relative;
+    left: 10px !important;
+  }
+}
+
+.loginCard {
+  box-shadow: outset 10px 0 0 10px #000000 !important;
 }
 
 @keyframes button-animator {

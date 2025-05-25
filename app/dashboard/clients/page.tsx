@@ -18,7 +18,7 @@ interface Client {
     email: string
     phone: string
   }
-  campaigns: string[]
+  campaings: string[]
   apiKey: string
   status: string
   createdAt: Date
@@ -33,7 +33,7 @@ export default function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
   const [sortBy, setSortBy] = useState("")
-  const [campaigns, setCampaigns] = useState<number>(0)
+  const [campaignsNums, setCampaignsNums] = useState<number>(0)
 
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function ClientsPage() {
           id: client._id,
           name: client.name,
           contactInfo: client.contactInfo,
-          campaigns: Array.isArray(client.campaigns) ? client.campaigns : [],
+          campaings: Array.isArray(client.campaings) ? client.campaings : [],
           apiKey: client.apiKey,
           status: client.status || 'Active',
           createdAt: new Date(client.created_at),
@@ -70,9 +70,8 @@ export default function ClientsPage() {
         }))
 
         for (const client of mappedClients) {
-          const campaignsNumber = client.campaigns.length
-          setCampaigns(prev => prev + campaignsNumber)
-          console.log("Campaigns Number:", campaignsNumber)
+          const campaignsNumber = client.campaings.length
+          setCampaignsNums(campaignsNumber)
         }
         
         setClients(mappedClients)
@@ -181,7 +180,7 @@ export default function ClientsPage() {
           <TableHead>Contact</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Value</TableHead>
-          <TableHead>Projects</TableHead>
+          <TableHead>Campaigns</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -216,7 +215,7 @@ export default function ClientsPage() {
               </span>
             </TableCell>
             <TableCell>${client.value.toLocaleString()}</TableCell>
-            <TableCell>{campaigns}</TableCell>
+            <TableCell>{campaignsNums}</TableCell>
             <TableCell className="text-right">
               <div className="flex justify-end gap-2">
                 <Button variant="ghost" size="icon" asChild>

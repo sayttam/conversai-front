@@ -1,0 +1,135 @@
+import { Locale, TranslationKeys } from './types';
+// lib/i18n/translations.ts
+export const translations: Record<Locale, TranslationKeys> = {
+  es: {
+    // Navigation
+    dashboard: 'Panel de Control',
+    campaigns: 'Campañas',
+    clients: 'Clientes',
+    settings: 'Configuración',
+    login: 'Iniciar Sesión',
+    logout: 'Cerrar Sesión',
+    
+    // Home page
+    'hero.title': 'Plataforma Omnicanal de Agentes IA',
+    'hero.subtitle': 'Gestiona conversaciones inteligentes en WhatsApp, Facebook Messenger, Instagram Direct y WebChat desde una sola plataforma. Potencia tu negocio con IA avanzada y automatización inteligente.',
+    'hero.cta.dashboard': 'Acceder al Dashboard',
+    'hero.cta.demo': 'Solicitar Demo',
+    'features.title': 'Características Principales',
+    'features.subtitle': 'Todo lo que necesitas para automatizar y optimizar tus conversaciones con clientes',
+    'features.aiAgents.title': 'Agentes IA Inteligentes',
+    'features.aiAgents.description': 'Chatbots powered by IA que entienden contexto, mantienen conversaciones naturales y aprenden de cada interacción.',
+    'features.omnichannel.title': 'Gestión Omnicanal',
+    'features.omnichannel.description': 'Unifica todas tus conversaciones de WhatsApp, Messenger, Instagram y WebChat en una sola interfaz.',
+    'features.analytics.title': 'Analytics Avanzado',
+    'features.analytics.description': 'Métricas detalladas de rendimiento, satisfacción del cliente y efectividad de campañas en tiempo real.',
+    'features.clientManagement.title': 'Gestión de Clientes',
+    'features.clientManagement.description': 'Administra múltiples clientes B2B con roles y permisos personalizados en una arquitectura multi-tenant segura.',
+    'features.automation.title': 'Automatización Inteligente',
+    'features.automation.description': 'Flujos de trabajo automatizados que responden instantáneamente y escalan según la demanda.',
+    'features.customization.title': 'Configuración Personalizada',
+    'features.customization.description': 'Personaliza comportamientos, entrenamientos y respuestas para cada cliente y campaña específica.',
+    
+    // Dashboard
+    'dashboard.welcome': 'Bienvenido,',
+    'dashboard.totalConversations': 'Conversaciones Totales',
+    'dashboard.assignedClients': 'Clientes Asignados',
+    'dashboard.activeCampaigns': 'Campañas Activas',
+    'dashboard.userInfo': 'Información del Usuario',
+    'dashboard.recentActivity': 'Actividad Reciente',
+    'dashboard.campaignPerformance': 'Rendimiento de Campañas',
+    
+    // Login
+    'login.title': 'Iniciar Sesión',
+    'login.subtitle': 'Ingresa tus credenciales para acceder a tu cuenta',
+    'login.email': 'Correo Electrónico',
+    'login.password': 'Contraseña',
+    'login.rememberMe': 'Recordarme',
+    'login.forgotPassword': '¿Olvidaste tu contraseña?',
+    'login.submit': 'Entrar',
+    'login.needDemo': '¿Necesitas una cuenta demo? Contacta',
+    'login.contactSales': 'ventas',
+    
+    // Common
+    name: 'Nombre',
+    role: 'Rol',
+    email: 'Correo Electrónico',
+    profile: 'Perfil',
+    loading: 'Cargando...',
+    save: 'Guardar',
+    cancel: 'Cancelar',
+    delete: 'Eliminar',
+    edit: 'Editar',
+    create: 'Crear',
+    search: 'Buscar',
+    filter: 'Filtrar',
+    'common.fromLastWeek': 'desde la semana pasada',
+    'common.fromLastMonth': 'desde el mes pasado',
+  },
+  
+  en: {
+    // Navigation
+    dashboard: 'Dashboard',
+    campaigns: 'Campaigns',
+    clients: 'Clients',
+    settings: 'Settings',
+    login: 'Login',
+    logout: 'Logout',
+    
+    // Home page
+    'hero.title': 'Omnichannel AI Agents Platform',
+    'hero.subtitle': 'Manage intelligent conversations across WhatsApp, Facebook Messenger, Instagram Direct and WebChat from a single platform. Power your business with advanced AI and intelligent automation.',
+    'hero.cta.dashboard': 'Access Dashboard',
+    'hero.cta.demo': 'Request Demo',
+    'features.title': 'Key Features',
+    'features.subtitle': 'Everything you need to automate and optimize your customer conversations',
+    'features.aiAgents.title': 'Intelligent AI Agents',
+    'features.aiAgents.description': 'AI-powered chatbots that understand context, maintain natural conversations, and learn from every interaction.',
+    'features.omnichannel.title': 'Omnichannel Management',
+    'features.omnichannel.description': 'Unify all your WhatsApp, Messenger, Instagram and WebChat conversations in a single interface.',
+    'features.analytics.title': 'Advanced Analytics',
+    'features.analytics.description': 'Detailed performance metrics, customer satisfaction and real-time campaign effectiveness.',
+    'features.clientManagement.title': 'Client Management',
+    'features.clientManagement.description': 'Manage multiple B2B clients with custom roles and permissions in a secure multi-tenant architecture.',
+    'features.automation.title': 'Intelligent Automation',
+    'features.automation.description': 'Automated workflows that respond instantly and scale according to demand.',
+    'features.customization.title': 'Custom Configuration',
+    'features.customization.description': 'Customize behaviors, training and responses for each specific client and campaign.',
+    
+    // Dashboard
+    'dashboard.welcome': 'Welcome,',
+    'dashboard.totalConversations': 'Total Conversations',
+    'dashboard.assignedClients': 'Assigned Clients',
+    'dashboard.activeCampaigns': 'Active Campaigns',
+    'dashboard.userInfo': 'User Information',
+    'dashboard.recentActivity': 'Recent Activity',
+    'dashboard.campaignPerformance': 'Campaign Performance',
+    
+    // Login
+    'login.title': 'Sign in',
+    'login.subtitle': 'Enter your credentials to access your account',
+    'login.email': 'Email',
+    'login.password': 'Password',
+    'login.rememberMe': 'Remember me',
+    'login.forgotPassword': 'Forgot password?',
+    'login.submit': 'Login',
+    'login.needDemo': 'Need a demo account? Contact',
+    'login.contactSales': 'sales',
+    
+    // Common
+    name: 'Name',
+    role: 'Role',
+    email: 'Email',
+    profile: 'Profile',
+    loading: 'Loading...',
+    save: 'Save',
+    cancel: 'Cancel',
+    delete: 'Delete',
+    edit: 'Edit',
+    create: 'Create',
+    search: 'Search',
+    filter: 'Filter',
+    'common.fromLastWeek': 'from last week',
+    'common.fromLastMonth': 'from last month',
+  }
+};

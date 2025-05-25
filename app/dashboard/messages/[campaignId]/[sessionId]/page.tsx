@@ -215,21 +215,9 @@ export default function SessionChatPage({
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div className="mb-4">
-                        <h3 className="text-sm font-medium flex items-center mb-1">
-                            <Bot className="h-4 w-4 mr-1" />
-                            GPT Instance
-                        </h3>
-                        <div className="bg-gray-50 p-3 rounded-md">
-                            <p className="text-sm font-medium">Model: {session.gptInstance.model}</p>
-                            <p className="text-sm text-gray-600 mt-1 line-clamp-2">Instructions: {session.gptInstance.instructions}</p>
-                        </div>
-                    </div>
-                </CardContent>
             </Card>
 
-            <Card className="flex flex-col h-[calc(100vh-300px)]">
+            <Card className="flex flex-col h-[calc(200vh-600px)] ">
                 <CardHeader className="pb-3">
                     <CardTitle>Conversation History</CardTitle>
                 </CardHeader>

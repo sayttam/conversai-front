@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { toast } from "@/hooks/use-toast"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   DropdownMenu,
@@ -45,13 +46,31 @@ interface User {
     clientsAssigned: string[]
 }
 
+interface Client {
+  id: string
+  name: string
+  contactInfo: {
+    email: string
+    phone: string
+  }
+  campaings: string[]
+  apiKey: string
+  status: string
+  createdAt: Date
+  value: number
+  projects: number
+  __v: number
+}
+
 
 export default function CampaignsPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [filter, setFilter] = useState("all")
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [clients, setClients] = useState<Client[]>([])
   const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState<Boolean>(false)
 
   useEffect(() => {
     const getCampaigns = async () => {
@@ -105,6 +124,62 @@ export default function CampaignsPage() {
   
     getCampaigns();
   }, []);
+
+  useEffect(() => {
+       const fetchClients = async () => {
+      try {
+        const response = await fetch(`/api/clients`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": localStorage.getItem("accessToken") || "",
+            "User": localStorage.getItem("user") || "",
+          },
+          credentials: "include",
+        })
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch clients")
+        }
+        
+        const data = await response.json()
+        
+        // Mapear los datos del backend al formato del frontend
+        const mappedClients = data.map((client: any) => ({
+          id: client._id,
+          name: client.name,
+          contactInfo: client.contactInfo,
+          campaings: Array.isArray(client.campaings) ? client.campaings : [],
+          apiKey: client.apiKey,
+          status: client.status || 'Active',
+          createdAt: new Date(client.created_at),
+          value: client.value || 0,
+          projects: client.projects || 0,
+          __v: client.__v || 0
+        }))
+        
+        setClients(mappedClients)
+        
+        if (mappedClients.length === 0) {
+          toast({
+            title: "No Clients Found",
+            description: "You currently have no clients. Add a new client to get started.",
+          })
+        }
+      } catch (error) {
+        console.error("Error fetching clients:", error)
+        toast({
+          title: "Error",
+          description: "Failed to load clients",
+          variant: "destructive",
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchClients()
+  }, [])
   
 
   const filteredCampaigns = campaigns.filter((campaign) => {
@@ -131,6 +206,11 @@ export default function CampaignsPage() {
       default:
         return "bg-gray-500"
     }
+  }
+
+  const getClientName = (clientId: string): string => {
+    const client = clients.find(client => client.id === clientId)
+    return client ? client.name : 'Unknown Client'
   }
 
   return (
@@ -205,7 +285,7 @@ export default function CampaignsPage() {
                   filteredCampaigns.map((campaign) => (
                     <TableRow key={campaign._id}>
                       <TableCell className="font-medium">{campaign.name}</TableCell>
-                      <TableCell>{campaign.client}</TableCell>
+                      <TableCell>{getClientName(campaign.clientId)}</TableCell>
                       <TableCell>
                         <Badge variant="secondary" className={`${getStatusColor(campaign.status)} text-white`}>
                           {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}

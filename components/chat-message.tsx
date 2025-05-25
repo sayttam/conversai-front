@@ -21,8 +21,8 @@ export function ChatMessage({ message, consumerName }: ChatMessageProps) {
 
   return (
     <div className={cn("flex items-start gap-3 mb-4", isUser ? "flex-row-reverse" : "")}>
-      <Avatar className={cn("h-8 w-8", isUser ? "bg-green-500" : "bg-primary")}>
-        <AvatarFallback>{isUser ? consumerName?.charAt(0) || "U" : "AI"}</AvatarFallback>
+      <Avatar className={cn("h-8 w-8 border-1 shadow-sm", isUser ? "bg-green-500" : "bg-primary")}>
+        <AvatarFallback className={!isUser ? "messageAvatar" : ""}>{isUser ? consumerName?.charAt(0) || "U" : "AI"}</AvatarFallback>
       </Avatar>
       <div
         className={cn(

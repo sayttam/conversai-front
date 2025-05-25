@@ -240,9 +240,9 @@ export default function CampaignDetailsPage({ params }: { params: Promise<{ id: 
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Button asChild className="w-full">
-          <Link href={`/dashboard/chat/${campaign._id}`}>
+          <Link href={`/dashboard/messages/${campaign._id}`}>
             <MessageSquare className="mr-2 h-5 w-5" />
-            Open Chat
+            Messages
           </Link>
         </Button>
         <Button asChild variant="outline" className="w-full">

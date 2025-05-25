@@ -11,12 +11,15 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { LanguageSwitcher } from "@/components/ui/language-switcher"
+import { useTranslation } from "@/hooks/useTranslation"
 import Link from "next/link"
 import { isUserValidated } from "@/lib/validate-login"
-import Spinner from "@/components/ui/loading-spinner";
+import Spinner from "@/components/ui/loading-spinner"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { t, isEnglish } = useTranslation()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [email, setEmail] = useState("")
@@ -60,9 +63,9 @@ export default function LoginPage() {
         setLoginAttempts(newAttempts);
   
         if (newAttempts >= 5) {
-          setError("Too many failed attempts. Please try again later.");
+          setError(isEnglish ? "Too many failed attempts. Please try again later." : "Demasiados intentos fallidos. Inténtalo de nuevo más tarde.");
         } else {
-          setError(data.message || "Invalid email or password");
+          setError(data.message || (isEnglish ? "Invalid email or password" : "Email o contraseña inválidos"));
         }
         return;
       }
@@ -74,7 +77,7 @@ export default function LoginPage() {
       router.push("/dashboard");
       
     } catch (err) {
-      setError("An error occurred during login");
+      setError(isEnglish ? "An error occurred during login" : "Ocurrió un error durante el inicio de sesión");
       console.error(err);
     } finally {
       setIsLoading(false)
@@ -158,15 +161,24 @@ export default function LoginPage() {
     }
   };
 
-  
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center px-4 loginBackground">
+      {/* Language Switcher - Fixed position */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+      
+      <div className="w-full max-w-md loginCard">
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Sign in</CardTitle>
-            <CardDescription className="text-center">Enter your credentials to access your account</CardDescription>
+            <CardTitle className="text-2xl font-bold text-center">{t('login.title')}</CardTitle>
+            <img
+              src="../../ConversAI_logo1.png"
+              alt="ConversAI"
+              className="mb-6"
+              style={{ display: "flex", margin: "auto", padding: "auto", height: 50 }}
+            />
+            <CardDescription className="text-center">{t('login.subtitle')}</CardDescription>
           </CardHeader>
           <CardContent>
             {error && (
@@ -177,7 +189,7 @@ export default function LoginPage() {
             )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('login.email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -189,9 +201,9 @@ export default function LoginPage() {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t('login.password')}</Label>
                   <Link href="/forgot-password" className="text-sm text-primary hover:underline">
-                    Forgot password?
+                    {t('login.forgotPassword')}
                   </Link>
                 </div>
                 <Input
@@ -212,19 +224,19 @@ export default function LoginPage() {
                   htmlFor="remember"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  Remember me
+                  {t('login.rememberMe')}
                 </Label>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? <Spinner /> : "Login"}
+                {isLoading ? <Spinner /> : t('login.submit')}
               </Button>
             </form>
           </CardContent>
           <CardFooter className="flex justify-center">
             <p className="text-sm text-gray-500">
-              Need a demo account? Contact{" "}
+              {t('login.needDemo')}{" "}
               <Link href="/contact" className="text-primary hover:underline">
-                sales
+                {t('login.contactSales')}
               </Link>
             </p>
           </CardFooter>
@@ -233,4 +245,3 @@ export default function LoginPage() {
     </div>
   )
 }
-

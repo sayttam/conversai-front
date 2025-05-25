@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { LanguageSwitcher } from "@/components/ui/language-switcher"
+import { useTranslation } from "@/hooks/useTranslation"
 
 interface NavItem {
   title: string
@@ -45,6 +47,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const { t, isEnglish } = useTranslation()
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
   const [isMounted, setIsMounted] = useState(false)
   const [userData, setUserData] = useState<any>(null)
@@ -85,45 +88,30 @@ export default function DashboardLayout({
   // Regenerar navItems cuando userData cambie
   const navItems: NavItem[] = [
     {
-      title: "Dashboard",
+      title: t('dashboard'),
       href: "/dashboard",
       icon: <BarChart3 className="h-5 w-5" />,
     },
     {
-      title: "Campaigns",
+      title: t('campaigns'),
       href: "/dashboard/campaigns",
       icon: <Layers className="h-5 w-5" />,
       submenu: [
-        { title: "Active Campaigns", href: "/dashboard/campaigns" },
+        { title: isEnglish ? 'Active Campaigns' : 'Campañas Activas', href: "/dashboard/campaigns" },
         { 
-          title: "Create Campaign", 
+          title: isEnglish ? 'Create Campaign' : 'Crear Campaña', 
           href: "/dashboard/campaigns/create" + (userData?.clientsAssigned?.[0] ? `/${userData.clientsAssigned[0]}` : '') 
         },
-        { title: "Archives", href: "/dashboard/campaigns/archive" },
+        { title: isEnglish ? 'Archives' : 'Archivo', href: "/dashboard/campaigns/archive" },
       ],
     },
     {
-      title: "Products",
-      href: "/dashboard/products",
-      icon: <ShoppingBag className="h-5 w-5" />,
-    },
-    {
-      title: "Clients",
+      title: t('clients'),
       href: "/dashboard/clients",
       icon: <Users className="h-5 w-5" />,
     },
     {
-      title: "Chat Logs",
-      href: "/dashboard/chat-logs",
-      icon: <MessageSquare className="h-5 w-5" />,
-    },
-    {
-      title: "AI Settings",
-      href: "/dashboard/ai-settings",
-      icon: <Zap className="h-5 w-5" />,
-    },
-    {
-      title: "Settings",
+      title: t('settings'),
       href: "/dashboard/settings",
       icon: <Settings className="h-5 w-5" />,
     },
@@ -211,7 +199,7 @@ export default function DashboardLayout({
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center rounded-md px-3 py-2 text-sm font-medium",
+                      "flex items-center rounded-md px-3 py-2 text-sm font-medium sideBarLink",
                       pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-muted",
                     )}
                   >
@@ -223,7 +211,8 @@ export default function DashboardLayout({
             ))}
           </ul>
         </nav>
-        <div className="p-4 border-t">
+        <div className="p-4 border-t space-y-2">
+          <LanguageSwitcher />
           <ThemeToggle />
         </div>
       </aside>
@@ -306,7 +295,8 @@ export default function DashboardLayout({
                 ))}
               </ul>
             </nav>
-            <div className="p-4 border-t">
+            <div className="p-4 border-t space-y-2">
+              <LanguageSwitcher />
               <ThemeToggle />
             </div>
           </div>
@@ -347,17 +337,17 @@ export default function DashboardLayout({
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard/profile">Profile</Link>
+                      <Link href="/dashboard/profile">{t('profile')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard/settings">Settings</Link>
+                      <Link href="/dashboard/settings">{t('settings')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link href="/login" className="flex items-center"
                         onClick={handleLogout}>
                         <LogOut className="mr-2 h-4 w-4" />
-                        <span>Log Out</span>
+                        <span>{t('logout')}</span>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>

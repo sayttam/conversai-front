@@ -10,10 +10,12 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ArrowLeft, MessageSquare, Clock, User, Search } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
+import { useTranslation } from "@/hooks/useTranslation"
 import type { Session, Consumer } from "@/types/session"
 
 export default function CampaignMessagesPage({ params }: { params: { campaignId: string } }) {
     const router = useRouter()
+    const { t, isEnglish } = useTranslation()
     const [sessions, setSessions] = useState<Session[]>([])
     const [consumers, setConsumers] = useState<Record<string, Consumer>>({})
     const [loading, setLoading] = useState(true)
@@ -91,8 +93,8 @@ export default function CampaignMessagesPage({ params }: { params: { campaignId:
         } catch (error) {
             console.error("Error fetching sessions:", error)
             toast({
-                title: "Error",
-                description: "Failed to load chat sessions",
+                title: isEnglish ? "Error" : "Error",
+                description: isEnglish ? "Failed to load chat sessions" : "Error al cargar las sesiones de chat",
                 variant: "destructive",
             })
         } finally {
@@ -159,13 +161,19 @@ export default function CampaignMessagesPage({ params }: { params: { campaignId:
         <div className="container mx-auto p-6">
             <Button variant="outline" onClick={() => router.back()} className="mb-6">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
+                {isEnglish ? 'Back' : 'Volver'}
             </Button>
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold">Chat Sessions</h1>
-                    {campaign && <p className="text-gray-500">Campaign: {campaign.name}</p>}
+                    <h1 className="text-3xl font-bold">
+                        {isEnglish ? 'Chat Sessions' : 'Sesiones de Chat'}
+                    </h1>
+                    {campaign && (
+                        <p className="text-gray-500">
+                            {isEnglish ? 'Campaign' : 'Campaña'}: {campaign.name}
+                        </p>
+                    )}
                 </div>
             </div>
 
@@ -173,7 +181,10 @@ export default function CampaignMessagesPage({ params }: { params: { campaignId:
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                     <Input
-                        placeholder="Search by consumer name or email..."
+                        placeholder={isEnglish 
+                            ? "Search by consumer name or email..." 
+                            : "Buscar por nombre o email del cliente..."
+                        }
                         className="pl-10"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -184,9 +195,20 @@ export default function CampaignMessagesPage({ params }: { params: { campaignId:
             {filteredSessions.length === 0 ? (
                 <div className="text-center py-12">
                     <MessageSquare className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <h2 className="text-xl font-semibold mb-2">No chat sessions found</h2>
+                    <h2 className="text-xl font-semibold mb-2">
+                        {isEnglish ? 'No chat sessions found' : 'No se encontraron sesiones de chat'}
+                    </h2>
                     <p className="text-gray-500 mb-6">
-                        {searchTerm ? "No sessions match your search criteria" : "This campaign doesn't have any chat sessions yet"}
+                        {searchTerm 
+                            ? (isEnglish 
+                                ? "No sessions match your search criteria" 
+                                : "No hay sesiones que coincidan con tu búsqueda"
+                              )
+                            : (isEnglish 
+                                ? "This campaign doesn't have any chat sessions yet" 
+                                : "Esta campaña aún no tiene sesiones de chat"
+                              )
+                        }
                     </p>
                 </div>
             ) : (
@@ -204,38 +226,51 @@ export default function CampaignMessagesPage({ params }: { params: { campaignId:
                                     <div className="flex justify-between items-start">
                                         <div className="flex items-center">
                                             <User className="h-5 w-5 mr-2 text-gray-500" />
-                                            <CardTitle className="text-lg">{consumer?.name || "Unknown Consumer"}</CardTitle>
+                                            <CardTitle className="text-lg">
+                                                {consumer?.name || (isEnglish ? "Unknown Consumer" : "Cliente Desconocido")}
+                                            </CardTitle>
                                         </div>
                                         <Badge className={session.status === "active" ? "bg-green-500" : "bg-gray-500"}>
-                                            {session.status}
+                                            {session.status === "active" 
+                                                ? (isEnglish ? "Active" : "Activo")
+                                                : (isEnglish ? "Inactive" : "Inactivo")
+                                            }
                                         </Badge>
                                     </div>
-                                    <div className="text-sm text-gray-500">{consumer?.email || "No email available"}</div>
+                                    <div className="text-sm text-gray-500">
+                                        {consumer?.email || (isEnglish ? "No email available" : "Email no disponible")}
+                                    </div>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="flex justify-between items-center">
                                         <div>
                                             <div className="flex items-center text-sm text-gray-500 mb-2">
                                                 <Clock className="h-4 w-4 mr-1" />
-                                                Last activity: {new Date(session.lastActivity).toLocaleString()}
+                                                {isEnglish ? 'Last activity' : 'Última actividad'}: {" "}
+                                                {new Date(session.lastActivity).toLocaleString(
+                                                    isEnglish ? 'en-US' : 'es-ES'
+                                                )}
                                             </div>
                                             <div className="text-sm text-gray-600 line-clamp-1">
                                                 {lastMessage ? (
                                                     <>
                                                         <span className="font-medium">
-                                                            {lastMessage.role === "user" ? consumer?.name || "User" : "AI"}:
+                                                            {lastMessage.role === "user" 
+                                                                ? (consumer?.name || (isEnglish ? "User" : "Usuario"))
+                                                                : "AI"
+                                                            }:
                                                         </span>{" "}
                                                         {lastMessage.content}
                                                     </>
                                                 ) : (
-                                                    "No messages yet"
+                                                    isEnglish ? "No messages yet" : "Sin mensajes aún"
                                                 )}
                                             </div>
                                         </div>
                                         <Button asChild>
                                             <Link href={`/dashboard/messages/${campaignId}/${session._id}`}>
                                                 <MessageSquare className="mr-2 h-4 w-4" />
-                                                View Chat
+                                                {isEnglish ? 'View Chat' : 'Ver Chat'}
                                             </Link>
                                         </Button>
                                     </div>
@@ -248,4 +283,3 @@ export default function CampaignMessagesPage({ params }: { params: { campaignId:
         </div>
     )
 }
-
