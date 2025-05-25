@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server"
+import { envs } from "@/app/config/envs";
+
+export const dynamic = 'force-static';
 
 export function encodeBase64(str: string): string {
   return Buffer.from(str).toString('base64');
@@ -15,7 +18,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     } 
     
-    const getUserByEmail = await fetch(`http://localhost:5000/api/user/check?email=${email}`, {
+    const getUserByEmail = await fetch(`${envs.backendDevTunnel}/api/user/check?email=${email}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -31,7 +34,7 @@ export async function POST(request: Request) {
       })
     }
 
-    const createUser = await fetch("http://localhost:5000/api/user", {
+    const createUser = await fetch(envs.backendDevTunnel+"/api/user", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

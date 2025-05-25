@@ -1,10 +1,13 @@
+import { envs } from "@/app/config/envs"
 import { NextResponse } from "next/server"
+
+export const dynamic = 'force-static';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
 
-    const response = await fetch("http://localhost:5000/api/login", {
+    const response = await fetch(envs.backendDevTunnel + "/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

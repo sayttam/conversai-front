@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server"
+import { envs } from "@/app/config/envs";
+
+export const dynamic = 'error';
 
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const campaignId = url.pathname.split("/").pop();
-    const response = await fetch("http://localhost:5000/api/campaigns/id/"+ campaignId, {
+    const response = await fetch(`${envs.backendDevTunnel}/api/campaigns/id/${campaignId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

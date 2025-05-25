@@ -1,4 +1,7 @@
+import { envs } from "@/app/config/envs"
 import { NextResponse } from "next/server"
+
+export const dynamic = 'error';
 
 interface User {
     id: string
@@ -13,7 +16,7 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const email = url.pathname.split("/").pop();
-    const response = await fetch("http://localhost:5000/api/user/email/"+ email, {
+    const response = await fetch(envs.backendDevTunnel+"/api/user/email/"+ email, {
       method: "GET",
       mode: 'cors',
       headers: {

@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server"
+import { envs } from "@/app/config/envs"
+
+export const dynamic = 'error';
 
 interface User {
     id: string
@@ -13,7 +16,7 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const clientId = url.pathname.split("/").pop();
-    const response = await fetch("http://localhost:5000/api/campaigns/"+ clientId, {
+    const response = await fetch(`${envs.backendDevTunnel}/api/campaigns/${clientId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

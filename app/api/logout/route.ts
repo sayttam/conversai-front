@@ -1,8 +1,12 @@
+import { envs } from "@/app/config/envs";
 import { NextResponse } from "next/server"
+
+
+export const dynamic = 'force-static';
 
 export async function POST(request: Request) {
   try {
-    const response = await fetch("http://localhost:5000/api/logout", {
+    const response = await fetch(envs.backendDevTunnel + "/api/logout", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

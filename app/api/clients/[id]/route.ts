@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server"
+import { envs } from "@/app/config/envs";
 
+export const dynamic = 'error';
 
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const id = url.pathname.split("/").pop();
-    const response = await fetch(`http://localhost:5000/api/clients/${id}`, {
+    const response = await fetch(`${envs.backendDevTunnel}/api/clients/${id}`, {
       headers: {
         Authorization: `${request.headers.get("Authorization") || ""}`,
         "Content-Type": "application/json",
